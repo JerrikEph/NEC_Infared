@@ -1,0 +1,185 @@
+C51 COMPILER V9.00   MAIN                                                                  10/08/2012 14:05:17 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: E:\Program Files\keil\C51\BIN\C51.EXE main.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1           #include<reg51.h>
+   2           #include<intrins.h>
+   3           sbit P10 = P1^0;
+   4           unsigned char KeyVal;
+   5           unsigned Val;
+   6          void delay(unsigned int i)
+   7          {
+   8   1              while(i--);
+   9   1      }
+  10           void inf()
+  11           {
+  12   1              unsigned char i;
+  13   1              unsigned char j;
+  14   1              for(j=42;j;j--)
+  15   1              {
+  16   2                      P10=~P10;
+  17   2                      for(i=30;i!=0;i--){_nop_();}
+  18   2              }
+  19   1              P10=1;
+  20   1       }
+  21          
+  22           void init()
+  23           {
+  24   1               unsigned char i;
+  25   1              unsigned int j;
+  26   1              for(j=629;j;j--)
+  27   1              {
+  28   2                      P10=~P10;
+  29   2                      for(i=30;i!=0;i--){_nop_();}
+  30   2              }
+  31   1              P10=1;
+  32   1       }
+  33          
+  34          void wait45000()
+  35          {
+  36   1      unsigned int i;
+  37   1              for(i=3750;i;i--)_nop_();
+  38   1      }
+  39          void wait565()
+  40          {
+  41   1      unsigned int i;
+  42   1              for(i=400;i;i--)_nop_();
+  43   1      }
+  44          void wait1690()
+  45          {
+  46   1      unsigned int i;
+  47   1              for(i=1350;i;i--)_nop_();       
+  48   1      }
+  49          void sendnum(unsigned char Addr,unsigned char Val)
+  50          {
+  51   1      unsigned char i=8;
+  52   1      unsigned char addr=Addr;
+  53   1      unsigned char val=Val;
+  54   1      init();
+  55   1      wait45000();
+C51 COMPILER V9.00   MAIN                                                                  10/08/2012 14:05:17 PAGE 2   
+
+  56   1      while(i--)
+  57   1      {
+  58   2              inf();
+  59   2              if((addr&0x01)==0x01)wait1690();
+  60   2              else wait565();
+  61   2              addr>>=1;
+  62   2      }
+  63   1      i=8;
+  64   1      addr=~Addr;
+  65   1      while(i--)
+  66   1      {
+  67   2              inf();
+  68   2              if((addr&0x01)==0x01)wait1690();
+  69   2              else wait565();
+  70   2              addr>>=1;       
+  71   2      }
+  72   1      i=8;
+  73   1      while(i--)
+  74   1      {
+  75   2              inf();
+  76   2              if((val&0x01)==0x01)wait1690();
+  77   2              else wait565();
+  78   2              val>>=1;        
+  79   2      }
+  80   1      i=8;
+  81   1      val=~Val;
+  82   1      while(i--)
+  83   1      {
+  84   2              inf();
+  85   2              if((val&0x01)==0x01)wait1690();
+  86   2              else wait565();
+  87   2              val>>=1;        
+  88   2      }
+  89   1      inf();  
+  90   1      }
+  91          
+  92          unsigned char keyscan(void)
+  93          {
+  94   1        unsigned char keyvalue;
+  95   1        
+  96   1        P3 = 0x7F;   //S4 S5 S6 S7
+  97   1        delay(20);
+  98   1        switch(P3)
+  99   1        {
+ 100   2          case 0x7E: keyvalue = 0;break;
+ 101   2          case 0x7D: keyvalue = 4;break;
+ 102   2          case 0x7B: keyvalue = 8;break;
+ 103   2          case 0x77: keyvalue = 12;break;
+ 104   2          default: break;    
+ 105   2        }
+ 106   1        P3 = 0xBF;   //S8 S9 S10 S11
+ 107   1        delay(20);
+ 108   1        switch(P3)
+ 109   1        {
+ 110   2          case 0xBE: keyvalue = 1;break;
+ 111   2          case 0xBD: keyvalue = 5;break;
+ 112   2          case 0xBB: keyvalue = 9;break;
+ 113   2          case 0xB7: keyvalue = 13;break;
+ 114   2          default: break;
+ 115   2        }  
+ 116   1        P3 = 0xDF; //S12 S13 S14 S15
+ 117   1        delay(20);
+C51 COMPILER V9.00   MAIN                                                                  10/08/2012 14:05:17 PAGE 3   
+
+ 118   1        switch(P3)
+ 119   1        {
+ 120   2          case 0xDE: keyvalue = 2;break;
+ 121   2          case 0xDD: keyvalue = 6;break;
+ 122   2          case 0xDB: keyvalue = 10;break;
+ 123   2          case 0xD7: keyvalue = 14;break;
+ 124   2          default: break;
+ 125   2        }
+ 126   1        P3 = 0xEF; //S16 S17 S18 S19
+ 127   1        delay(20);
+ 128   1        switch(P3)
+ 129   1        {
+ 130   2          case 0xEE: keyvalue = 3;break;
+ 131   2          case 0xED: keyvalue = 7;break;
+ 132   2          case 0xEB: keyvalue = 11;break;
+ 133   2          case 0xE7: keyvalue = 15;break;
+ 134   2          default: break;  
+ 135   2        }
+ 136   1       // delay(20);
+ 137   1        return keyvalue;
+ 138   1      }
+ 139           void main()
+ 140           {
+ 141   1       P2&=0x1f;
+ 142   1      P0=0xff;
+ 143   1      P2|=0x80;
+ 144   1      
+ 145   1      P2&=0x1f;
+ 146   1      P0=0x01;
+ 147   1      P2|=0xa0;
+ 148   1      P2&=0x1f;
+ 149   1       while(1)
+ 150   1       {
+ 151   2       KeyVal=keyscan();
+ 152   2       if(Val!=KeyVal)
+ 153   2               {
+ 154   3               Val=KeyVal;
+ 155   3               sendnum(0x00,Val);
+ 156   3               }
+ 157   2       }      
+ 158   1       }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    458    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      3       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

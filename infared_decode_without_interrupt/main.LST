@@ -1,0 +1,151 @@
+C51 COMPILER V9.00   MAIN                                                                  11/19/2012 22:33:43 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: E:\Program Files\keil\C51\BIN\C51.EXE main.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include <reg51.h>
+   2          #include<intrins.h>
+   3           unsigned char NUM[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90};
+   4           sbit P11=P1^1;
+   5           unsigned int count;
+   6           unsigned char VL;
+   7           unsigned char VH;
+   8           unsigned char VAL;
+   9           void delay(unsigned int i)
+  10           {
+  11   1       while(i--);
+  12   1       }
+  13           
+  14            void Display_One_Digit(unsigned char loc,unsigned char val);
+  15            void Display_Num(unsigned char val);
+  16            void main()
+  17            {
+  18   1              unsigned char i;
+  19   1              unsigned char time_slice=0;
+  20   1              EA=1;
+  21   1              
+  22   1              TMOD=0X01;
+  23   1              TR0=1;
+  24   1              
+  25   1              P2&=0x1f;
+  26   1              P0=0xff;
+  27   1              P2|=0x80;
+  28   1      
+  29   1              P2&=0x1f;
+  30   1              P0=0x01;
+  31   1              P2|=0xa0;
+  32   1              P2&=0x1f;
+  33   1              while(1){
+  34   2              delay(100);
+  35   2              while((time_slice==0)&&(P11==0))
+  36   2              {
+  37   3                      i=32;
+  38   3                      TL0=TH0=0;
+  39   3                      delay(10);
+  40   3                      while(!P11);
+  41   3                      if((TH0*256+TL0)>5000)
+  42   3                      {
+  43   4                              TL0=TH0=0;
+  44   4                              delay(10);
+  45   4                              do{     
+  46   5                              while(P11&&((TH0*256+TL0)<6000));
+  47   5                              if((TH0*256+TL0)>6000)goto loop; //判断是不是由于超时造成的退出循环
+  48   5                              delay(1);
+  49   5                              }while(P11);    //保证确实不是因为干扰毛刺下来的
+  50   4                              while(i--)
+  51   4                              {
+  52   5                                      
+  53   5                                      TL0=TH0=0;
+  54   5                                      while(!P11);
+  55   5                                      do
+C51 COMPILER V9.00   MAIN                                                                  11/19/2012 22:33:43 PAGE 2   
+
+  56   5                                      {
+  57   6                                      while(P11&&((TH0*256+TL0)<3000));
+  58   6                                      if((TH0*256+TL0)>3000)goto loop;
+  59   6                                      count=(TH0*256+TL0);
+  60   6                                      delay(1);
+  61   6                                      }while(P11);     //保证确实不是因为干扰毛刺下来的       
+  62   5                                      if(i<16)
+  63   5                                      {
+  64   6                                              if(i>7)
+  65   6                                              {
+  66   7                                                      VH>>=1;
+  67   7                                                      if((count)>2000)VH|=0x80;
+  68   7                                              }
+  69   6                                              else
+  70   6                                              {
+  71   7                                                      VL>>=1;
+  72   7                                                      if((count)>2000)VL|=0x80;
+  73   7                                              }       
+  74   6                                      }
+  75   5                              }
+  76   4                              if((VH^VL)==0xff)VAL=VH;
+  77   4                      }
+  78   3              }
+  79   2              
+  80   2      loop:
+  81   2              time_slice=1;
+  82   2              while(time_slice==1)
+  83   2              {
+  84   3                      if(P11==0)break;
+  85   3                      Display_Num(VAL);
+  86   3                      delay(50);
+  87   3              }
+  88   2              time_slice=0;
+  89   2              }
+  90   1        }
+  91            
+  92            void Display_One_Digit(unsigned char loc,unsigned char val)
+  93          {
+  94   1              P2&=0x1f;
+  95   1              P2|=0xef;
+  96   1              P0=val;
+  97   1              P2&=0x1f;
+  98   1      
+  99   1              switch(loc)
+ 100   1              {
+ 101   2                      case 8:P0=0x01;break;
+ 102   2                      case 7:P0=0x02;break;
+ 103   2                      case 6:P0=0x04;break;
+ 104   2                      case 5:P0=0x08;break;
+ 105   2                      case 4:P0=0x10;break;
+ 106   2                      case 3:P0=0x20;break;
+ 107   2                      case 2:P0=0x40;break;
+ 108   2                      case 1:P0=0x80;break;
+ 109   2              }
+ 110   1              
+ 111   1              P2|=0xc0;
+ 112   1              delay(100);             /*************/
+ 113   1              P0=0x00;
+ 114   1              P2*=0x1f;
+ 115   1      }
+ 116          void Display_Num(unsigned char val)
+ 117          {
+C51 COMPILER V9.00   MAIN                                                                  11/19/2012 22:33:43 PAGE 3   
+
+ 118   1              if((val/100)!=0)Display_One_Digit(3,NUM[val/100]);
+ 119   1              if(((val/100)!=0)||((val/10)!=0))Display_One_Digit(2,NUM[(val/10)%10]);
+ 120   1              Display_One_Digit(1,NUM[val%10]);       
+ 121   1      }
+ 122          
+ 123          
+ 124          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    554    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     15       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
